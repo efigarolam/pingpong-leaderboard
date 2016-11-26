@@ -6,7 +6,13 @@ class Game < ActiveRecord::Base
   validates :your_score, :their_score, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validate :scores_meet_rules
 
+  after_validation :set_victory
+
   private
+
+  def set_victory
+    self.victory =  self.your_score > self.their_score
+  end
 
   def scores_meet_rules
     difference = (self.your_score - self.their_score).abs

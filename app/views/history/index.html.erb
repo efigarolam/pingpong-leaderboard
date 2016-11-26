@@ -1,0 +1,30 @@
+<h1 class='page-header'>History</h1>
+
+<div class="row">
+  <div class="col-lg-6 col-lg-offset-3">
+    <%- unless @games.empty? %>
+      <table class="table table-striped">
+        <thead>
+          <th>Date</th>
+          <th>Opponent</th>
+          <th>Score</th>
+          <th>Result</th>
+        </thead>
+        <tbody>
+          <%- @games.each do |game| %>
+            <tr>
+              <td><%= game.date_played %></td>
+              <td><%= game.opponent.email %></td>
+              <td><%= game.your_score %> - <%= game.their_score %></td>
+              <td><%= game.victory? ? 'W' : 'L' %></td>
+            </tr>
+          <%- end %>
+        </tbody>
+      </table>
+    <%- else %>
+      <p class="text-center">
+        <strong>You haven't played a match yet.</strong>
+      </p>
+    <%- end %>
+  </div>
+</div>
