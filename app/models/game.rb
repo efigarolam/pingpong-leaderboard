@@ -1,4 +1,6 @@
 class Game < ActiveRecord::Base
+  DEFAULT_SCORE_PER_GAME = 50
+
   belongs_to :opponent, class_name: User
   belongs_to :user
 
@@ -7,8 +9,53 @@ class Game < ActiveRecord::Base
   validate :scores_meet_rules
 
   after_validation :set_victory
+  after_save :set_users_score, :update_rankings
 
   private
+
+  def set_users_score
+    if self.victory?
+      set_winner_score
+    else
+      set_opponent_score
+    end
+  end
+
+  def set_winner_score
+    user_ranking = user.ranking
+    opponent_ranking = opponent.ranking
+
+    if user_ranking >= opponent_ranking
+      user.score += DEFAULT_SCORE_PER_GAME
+    else
+      difference = opponent_ranking - user_ranking
+      user.score += DEFAULT_SCORE_PER_GAME * difference
+    end
+
+    user.save
+  end
+
+  def set_opponent_score
+    user_ranking = user.ranking
+    opponent_ranking = opponent.ranking
+
+    if opponent_ranking >= user_ranking
+      opponent.score += DEFAULT_SCORE_PER_GAME
+    else
+      difference = user_ranking - opponent_ranking
+      opponent.score += DEFAULT_SCORE_PER_GAME * difference
+    end
+
+    opponent.save
+  end
+
+  def update_rankings
+    users = User.all.order('score DESC')
+
+    users.each_with_index do |user, index|
+      user.update_attribute :ranking, index + 1
+    end
+  end
 
   def set_victory
     self.victory =  self.your_score > self.their_score
